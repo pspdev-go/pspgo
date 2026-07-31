@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -103,10 +104,5 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 }
 
 func containsArg(args []string, wanted string) bool {
-	for _, arg := range args {
-		if arg == wanted {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(args, wanted)
 }

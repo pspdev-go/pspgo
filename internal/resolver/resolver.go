@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -34,7 +35,7 @@ func Resolve(ctx context.Context, runner command.Runner, nm, pspdev string, obje
 		return Result{}, err
 	}
 	var symbols []string
-	for _, line := range strings.Split(string(out), "\n") {
+	for line := range strings.SplitSeq(string(out), "\n") {
 		if match := undefinedLine.FindStringSubmatch(line); match != nil {
 			symbols = append(symbols, match[1])
 		}
@@ -63,8 +64,8 @@ func Resolve(ctx context.Context, runner command.Runner, nm, pspdev string, obje
 			continue
 		}
 		visitedSymbols[symbol] = true
-		if strings.HasPrefix(symbol, "pspsdk_go_require_") {
-			name := strings.TrimPrefix(symbol, "pspsdk_go_require_")
+		if after, ok := strings.CutPrefix(symbol, "pspsdk_go_require_"); ok {
+			name := after
 			path := filepath.Join(libDir, "lib"+name+".a")
 			if !contains(archives, path) {
 				return Result{}, fmt.Errorf("required PSPSDK library does not exist: %s", path)
@@ -107,7 +108,7 @@ func Resolve(ctx context.Context, runner command.Runner, nm, pspdev string, obje
 
 func parseIndex(text string) index {
 	idx := index{definitions: map[string][]member{}, undefined: map[member][]string{}}
-	for _, line := range strings.Split(text, "\n") {
+	for line := range strings.SplitSeq(text, "\n") {
 		m := archiveLine.FindStringSubmatch(line)
 		if m == nil {
 			continue
@@ -170,10 +171,5 @@ var ignored = func() map[string]bool {
 }()
 
 func contains(items []string, wanted string) bool {
-	for _, item := range items {
-		if item == wanted {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(items, wanted)
 }

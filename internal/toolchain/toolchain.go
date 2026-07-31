@@ -93,8 +93,8 @@ func GoEnvironment(ctx context.Context, runner command.Runner, cfg config.Config
 func environmentValue(env []string, key string) string {
 	prefix := key + "="
 	for _, item := range env {
-		if strings.HasPrefix(item, prefix) {
-			return strings.TrimPrefix(item, prefix)
+		if after, ok := strings.CutPrefix(item, prefix); ok {
+			return after
 		}
 	}
 	return ""
@@ -135,7 +135,7 @@ func moduleGoVersion(root string) string {
 	for dir := root; dir != ""; dir = filepath.Dir(dir) {
 		data, err := os.ReadFile(filepath.Join(dir, "go.mod"))
 		if err == nil {
-			for _, line := range strings.Split(string(data), "\n") {
+			for line := range strings.SplitSeq(string(data), "\n") {
 				fields := strings.Fields(line)
 				if len(fields) == 2 && fields[0] == "go" {
 					return fields[1]
