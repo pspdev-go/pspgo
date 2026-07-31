@@ -31,7 +31,7 @@ func Inspect(ctx context.Context, runner command.Runner, cfg config.Config) Repo
 	}{
 		{"tinygo", cfg.TinyGo, []string{"version"}},
 		{"psp-cmake", cfg.PSPCMake, []string{"--version"}}, {"psp-nm", cfg.PSPNM, []string{"--version"}},
-		{"cmake", cfg.CMake, []string{"--version"}}, {"make", cfg.Make, []string{"--version"}},
+		{"cmake", cfg.CMake, []string{"--version"}},
 	}
 	goItem := Item{Name: "go", Err: goEnvErr}
 	if goEnvErr == nil {

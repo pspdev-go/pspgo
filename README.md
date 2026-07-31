@@ -21,7 +21,7 @@ Before installing `pspgo`, prepare:
 - [Go](https://go.dev/)
 - Forked [TinyGo](https://github.com/pspdev-go/tinygo) with PSP support
 - [PSPSDK](https://github.com/pspdev/pspdev)
-- CMake and Make
+- CMake
 - a checkout of [`pspsdk-go`](https://github.com/pspdev-go/pspsdk-go)
 
 Set `PSPDEV` to the PSPSDK installation directory and ensure the PSPSDK tools
@@ -75,8 +75,8 @@ pspgo doctor
 pspgo build ./example
 ```
 
-`doctor` checks Go, TinyGo, PSPSDK, CMake, and Make before building. The
-generated application is:
+`doctor` checks Go, TinyGo, PSPSDK, and CMake before building. The generated
+application is:
 
 ```text
 build/pspgo/cmake/EBOOT.PBP
@@ -123,7 +123,6 @@ Configuration can be supplied through environment variables:
 | `PSPGO_PSP_CMAKE` | `psp-cmake` executable        |
 | `PSPGO_PSP_NM`    | `psp-nm` executable           |
 | `PSPGO_CMAKE`     | CMake executable              |
-| `PSPGO_MAKE`      | Make executable               |
 | `PSPGO_PPSSPP`    | PPSSPP executable             |
 | `PSPDEV`          | PSPSDK installation directory |
 
@@ -162,6 +161,10 @@ target = "/path/to/custom-psp.json"
 4. `pspgo` selects the required `pspsdk-go` bridge sources and PSPSDK
    libraries.
 5. PSP CMake and GCC link the application and package `EBOOT.PBP`.
+
+`pspgo` invokes `cmake --build` and does not call Make directly. CMake may use
+Make, Ninja, or another available build backend depending on its configured
+generator.
 
 `pspsdk-go` remains the source of truth for PSP API packages, startup code,
 library requirement markers, and ABI adapters. `pspgo` supplies the compiler
