@@ -108,7 +108,7 @@ func (r Report) Validate(cfg config.Config) error {
 		}
 	}
 	if cfg.SDKRoot == "" {
-		failures = append(failures, "sdk_root: set sdk_root in pspgo.toml (the SDK must provide bridge/main.c)")
+		failures = append(failures, "pspsdk-go module directory was not resolved")
 	}
 	goVersion, tinyGoHost := "", ""
 	for _, item := range r.Items {

@@ -39,7 +39,7 @@ func Load(start string) (Config, error) {
 	}
 	cfg := Config{
 		Root: root, Package: ".", BuildDir: "build/pspgo",
-		OutputName: "app", Title: "PSP Go Application", SDKRoot: env("PSPGO_SDK", ""),
+		OutputName: "app", Title: "PSP Go Application",
 		Go: env("PSPGO_GO", "go"), TinyGo: env("PSPGO_TINYGO", "tinygo"),
 		PSPCMake: env("PSPGO_PSP_CMAKE", "psp-cmake"),
 		PSPNM:    env("PSPGO_PSP_NM", env("PSPGO_NM", "psp-nm")),
@@ -79,8 +79,6 @@ func Load(start string) (Config, error) {
 			cfg.OutputName = value
 		case "title":
 			cfg.Title = value
-		case "sdk_root":
-			cfg.SDKRoot = value
 		case "target":
 			cfg.Target = value
 		case "kernel_mode":
@@ -122,7 +120,7 @@ func env(key, fallback string) string {
 }
 
 func (c *Config) resolvePaths() {
-	for _, field := range []*string{&c.BuildDir, &c.SDKRoot, &c.Target} {
+	for _, field := range []*string{&c.BuildDir, &c.Target} {
 		if *field != "" && !filepath.IsAbs(*field) {
 			*field = filepath.Join(c.Root, *field)
 		}
@@ -143,17 +141,4 @@ func (c *Config) autoDetect() {
 		c.NM = c.PSPNM
 	}
 	c.resolvePaths()
-	if c.SDKRoot == "" {
-		for dir := c.Root; ; dir = filepath.Dir(dir) {
-			if exists(filepath.Join(dir, "bridge", "main.c")) {
-				c.SDKRoot = dir
-				break
-			}
-			if filepath.Dir(dir) == dir {
-				break
-			}
-		}
-	}
 }
-
-func exists(path string) bool { _, err := os.Stat(path); return err == nil }

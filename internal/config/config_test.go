@@ -19,7 +19,7 @@ func TestLoadWithoutConfig(t *testing.T) {
 
 func TestLoadConfig(t *testing.T) {
 	dir := t.TempDir()
-	text := "title = \"Cube\"\noutput = \"cube\"\nkernel_mode = true\nsdk_root = \"sdk\"\n"
+	text := "title = \"Cube\"\noutput = \"cube\"\nkernel_mode = true\n"
 	if err := os.WriteFile(filepath.Join(dir, "pspgo.toml"), []byte(text), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -29,8 +29,5 @@ func TestLoadConfig(t *testing.T) {
 	}
 	if cfg.Title != "Cube" || cfg.OutputName != "cube" || !cfg.KernelMode {
 		t.Fatalf("config = %#v", cfg)
-	}
-	if cfg.SDKRoot != filepath.Join(dir, "sdk") {
-		t.Fatalf("sdk root = %s", cfg.SDKRoot)
 	}
 }

@@ -22,7 +22,6 @@ Before installing `pspgo`, prepare:
 - Forked [TinyGo](https://github.com/pspdev-go/tinygo) with PSP support
 - [PSPSDK](https://github.com/pspdev/pspdev)
 - CMake
-- a checkout of [`pspsdk-go`](https://github.com/pspdev-go/pspsdk-go)
 
 Set `PSPDEV` to the PSPSDK installation directory and ensure the PSPSDK tools
 are available:
@@ -82,19 +81,19 @@ application is:
 build/pspgo/cmake/EBOOT.PBP
 ```
 
-For an application in a separate directory, point `pspgo` at the
-`pspsdk-go` checkout:
+For an application in a separate directory, add `pspsdk-go` to its module:
 
 ```sh
-export PSPGO_SDK=/path/to/pspsdk-go
 cd /path/to/my-pspsdk-go-app
+go get github.com/pspdev-go/pspsdk-go@latest
 
 pspgo doctor
 pspgo build .
 ```
 
-The SDK is detected automatically when the project or one of its parent
-directories contains `bridge/main.c`.
+`pspgo` resolves the SDK directory from the project's Go module graph. This
+works with downloaded modules as well as local paths configured with a
+`replace` directive.
 
 ## Commands
 
@@ -117,7 +116,6 @@ Configuration can be supplied through environment variables:
 
 | Variable          | Purpose                       |
 | ----------------- | ----------------------------- |
-| `PSPGO_SDK`       | `pspsdk-go` checkout          |
 | `PSPGO_GO`        | bootstrap Go executable       |
 | `PSPGO_TINYGO`    | TinyGo executable             |
 | `PSPGO_PSP_CMAKE` | `psp-cmake` executable        |
@@ -131,7 +129,6 @@ A project can instead contain a `pspgo.toml`:
 ```toml
 title = "My PSP Game"
 output = "my-game"
-sdk_root = "../pspsdk-go"
 build_dir = "build/pspgo"
 kernel_mode = false
 

@@ -12,6 +12,7 @@ import (
 	"github.com/pspdev-go/pspgo/internal/build"
 	"github.com/pspdev-go/pspgo/internal/command"
 	"github.com/pspdev-go/pspgo/internal/config"
+	"github.com/pspdev-go/pspgo/internal/sdk"
 	psptarget "github.com/pspdev-go/pspgo/internal/target"
 	"github.com/pspdev-go/pspgo/internal/toolchain"
 )
@@ -33,6 +34,12 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 	runner := command.ExecRunner{Stdout: stdout, Stderr: stderr, Verbose: *verbose}
+	if name != "clean" {
+		cfg.SDKRoot, err = sdk.Resolve(ctx, runner, cfg)
+		if err != nil {
+			return fmt.Errorf("resolve pspsdk-go: %w", err)
+		}
+	}
 	report := toolchain.Inspect(ctx, runner, cfg)
 	switch name {
 	case "env":
