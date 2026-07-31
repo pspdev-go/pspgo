@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -20,7 +21,9 @@ func (f fakeRunner) Output(_ context.Context, spec command.Spec) ([]byte, error)
 	if len(spec.Args) >= 2 && spec.Args[0] == "env" && spec.Args[1] == "GOROOT" {
 		return []byte("/toolchains/go1.25.9\n"), nil
 	}
-	return []byte(f.sdk + "\n"), nil
+	return json.Marshal(struct {
+		Dir string
+	}{Dir: f.sdk})
 }
 
 func TestResolve(t *testing.T) {

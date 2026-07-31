@@ -3,10 +3,10 @@ package sdk
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/pspdev-go/pspgo/internal/command"
 	"github.com/pspdev-go/pspgo/internal/config"
@@ -24,14 +24,24 @@ func Resolve(ctx context.Context, runner command.Runner, cfg config.Config) (str
 	goPath := filepath.Join(goRoot, "bin", "go")
 	out, err := runner.Output(ctx, command.Spec{
 		Path: goPath,
-		Args: []string{"list", "-m", "-f", "{{.Dir}}", Module},
+		Args: []string{"mod", "download", "-json", Module},
 		Dir:  cfg.Root,
 		Env:  goEnv,
 	})
 	if err != nil {
 		return "", fmt.Errorf("%s is not available from the project module; add it with `go get %s`: %w", Module, Module, err)
 	}
-	root := strings.TrimSpace(string(out))
+	var downloaded struct {
+		Dir   string
+		Error string
+	}
+	if err := json.Unmarshal(out, &downloaded); err != nil {
+		return "", fmt.Errorf("decode module location: %w", err)
+	}
+	if downloaded.Error != "" {
+		return "", fmt.Errorf("download %s: %s", Module, downloaded.Error)
+	}
+	root := downloaded.Dir
 	if root == "" {
 		return "", fmt.Errorf("%s did not resolve to a local directory", Module)
 	}
@@ -44,8 +54,8 @@ func Resolve(ctx context.Context, runner command.Runner, cfg config.Config) (str
 func environmentValue(env []string, key string) string {
 	prefix := key + "="
 	for _, item := range env {
-		if strings.HasPrefix(item, prefix) {
-			return strings.TrimPrefix(item, prefix)
+		if len(item) >= len(prefix) && item[:len(prefix)] == prefix {
+			return item[len(prefix):]
 		}
 	}
 	return ""
