@@ -47,6 +47,9 @@ func (b Builder) Build(ctx context.Context) (string, error) {
 	if b.PSPDEV == "" {
 		b.PSPDEV = os.Getenv("PSPDEV")
 	}
+	if err := validateAssets(cfg); err != nil {
+		return "", fmt.Errorf("package assets: %w", err)
+	}
 	b.Config = cfg
 	objectDir := filepath.Join(cfg.BuildDir, "obj")
 	cmakeDir := filepath.Join(cfg.BuildDir, "cmake")
@@ -106,12 +109,25 @@ func (b Builder) cmake(object string, result resolver.Result) (string, error) {
 		sources = append(sources, path)
 	}
 	sort.Strings(sources)
-	var sourceLines, libraryLines strings.Builder
+	var sourceLines, libraryLines, assetLines strings.Builder
 	for _, source := range sources {
 		fmt.Fprintf(&sourceLines, "  %s\n", cmakeQuote(source))
 	}
 	for _, library := range result.Libraries {
 		fmt.Fprintf(&libraryLines, "  %s\n", library)
+	}
+	for _, asset := range []struct {
+		keyword, path string
+	}{
+		{"ICON_PATH", cfg.Icon},
+		{"ANIM_PATH", cfg.Animation},
+		{"PREVIEW_PATH", cfg.Preview},
+		{"BACKGROUND_PATH", cfg.Background},
+		{"MUSIC_PATH", cfg.Music},
+	} {
+		if asset.path != "" {
+			fmt.Fprintf(&assetLines, "  %s %s\n", asset.keyword, cmakeQuote(asset.path))
+		}
 	}
 	return fmt.Sprintf(`cmake_minimum_required(VERSION 3.16)
 include("$ENV{PSPDEV}/psp/share/pspdev.cmake")
@@ -136,10 +152,37 @@ target_link_libraries(%s
   c
 %s  -Wl,--end-group
 )
-create_pbp_file(TARGET %s TITLE %s)
+create_pbp_file(
+  TARGET %s
+  TITLE %s
+%s)
 `, cfg.OutputName, sourceLines.String(), cmakeQuote(object), cmakeQuote(object),
 		cfg.OutputName, cmakeQuote(cfg.SDKRoot), cfg.OutputName, cfg.OutputName, cfg.OutputName,
-		libraryLines.String(), cfg.OutputName, cmakeQuote(cfg.Title)), nil
+		libraryLines.String(), cfg.OutputName, cmakeQuote(cfg.Title), assetLines.String()), nil
+}
+
+func validateAssets(cfg config.Config) error {
+	for _, asset := range []struct {
+		name, path string
+	}{
+		{"icon", cfg.Icon},
+		{"animation", cfg.Animation},
+		{"preview", cfg.Preview},
+		{"background", cfg.Background},
+		{"music", cfg.Music},
+	} {
+		if asset.path == "" {
+			continue
+		}
+		info, err := os.Stat(asset.path)
+		if err != nil {
+			return fmt.Errorf("%s %q: %w", asset.name, asset.path, err)
+		}
+		if info.IsDir() {
+			return fmt.Errorf("%s %q is a directory", asset.name, asset.path)
+		}
+	}
+	return nil
 }
 
 func writeIfChanged(path string, data []byte) error {

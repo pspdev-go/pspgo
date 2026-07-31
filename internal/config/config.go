@@ -16,6 +16,11 @@ type Config struct {
 	BuildDir   string
 	OutputName string
 	Title      string
+	Icon       string
+	Animation  string
+	Preview    string
+	Background string
+	Music      string
 	SDKRoot    string
 	Target     string
 	KernelMode bool
@@ -79,6 +84,16 @@ func Load(start string) (Config, error) {
 			cfg.OutputName = value
 		case "title":
 			cfg.Title = value
+		case "icon":
+			cfg.Icon = value
+		case "animation":
+			cfg.Animation = value
+		case "preview":
+			cfg.Preview = value
+		case "background":
+			cfg.Background = value
+		case "music":
+			cfg.Music = value
 		case "target":
 			cfg.Target = value
 		case "kernel_mode":
@@ -120,7 +135,9 @@ func env(key, fallback string) string {
 }
 
 func (c *Config) resolvePaths() {
-	for _, field := range []*string{&c.BuildDir, &c.Target} {
+	for _, field := range []*string{
+		&c.BuildDir, &c.Target, &c.Icon, &c.Animation, &c.Preview, &c.Background, &c.Music,
+	} {
 		if *field != "" && !filepath.IsAbs(*field) {
 			*field = filepath.Join(c.Root, *field)
 		}

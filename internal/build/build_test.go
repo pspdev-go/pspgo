@@ -75,9 +75,19 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 	}
 	t.Setenv("PSPDEV", pspdev)
 	fake := &fakeRunner{lib: lib}
+	assets := map[string]string{}
+	for _, name := range []string{"ICON0.PNG", "ICON1.PMF", "PIC0.PNG", "PIC1.PNG", "SND0.AT3"} {
+		path := filepath.Join(root, name)
+		if err := os.WriteFile(path, nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+		assets[name] = path
+	}
 	cfg := config.Config{
 		ProjectDir: root, Package: "./example", SDKRoot: sdk, BuildDir: filepath.Join(root, "build"),
 		Title: "Cube", Go: "go", TinyGo: "tinygo", PSPCMake: "psp-cmake", CMake: "cmake", NM: nm,
+		Icon: assets["ICON0.PNG"], Animation: assets["ICON1.PMF"], Preview: assets["PIC0.PNG"],
+		Background: assets["PIC1.PNG"], Music: assets["SND0.AT3"],
 	}
 	pbp, err := (Builder{Config: cfg, Runner: fake}).Build(context.Background())
 	if err != nil {
@@ -94,6 +104,11 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 	for _, want := range []string{
 		"gum_abi.c", "pspgum", "create_pbp_file",
 		"_globals_start=_fdata", "_globals_end=_end", "_stack_top=0x0A000000",
+		"ICON_PATH " + cmakeQuote(assets["ICON0.PNG"]),
+		"ANIM_PATH " + cmakeQuote(assets["ICON1.PMF"]),
+		"PREVIEW_PATH " + cmakeQuote(assets["PIC0.PNG"]),
+		"BACKGROUND_PATH " + cmakeQuote(assets["PIC1.PNG"]),
+		"MUSIC_PATH " + cmakeQuote(assets["SND0.AT3"]),
 	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("generated CMake missing %q:\n%s", want, text)
@@ -108,6 +123,14 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 				t.Errorf("TinyGo command does not use its built-in PSP target: %v", spec.Args)
 			}
 		}
+	}
+}
+
+func TestBuildRejectsMissingAsset(t *testing.T) {
+	cfg := config.Config{Icon: filepath.Join(t.TempDir(), "missing.png")}
+	_, err := (Builder{Config: cfg}).Build(context.Background())
+	if err == nil || !strings.Contains(err.Error(), "package assets: icon") {
+		t.Fatalf("Build() error = %v", err)
 	}
 }
 

@@ -4,6 +4,13 @@ output = "app"
 build_dir = "build/pspgo"
 kernel_mode = false
 
+# Optional PSP menu assets. Paths are relative to this file.
+# icon = "assets/ICON0.PNG"
+# animation = "assets/ICON1.PMF"
+# preview = "assets/PIC0.PNG"
+# background = "assets/PIC1.PNG"
+# music = "assets/SND0.AT3"
+
 # Every executable can also be overridden with PSPGO_* environment variables.
 # target = "/absolute/path/to/custom-psp.json"
 # tinygo = "/absolute/path/to/tinygo"

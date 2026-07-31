@@ -131,6 +131,9 @@ title = "My PSP Game"
 output = "my-game"
 build_dir = "build/pspgo"
 kernel_mode = false
+icon = "assets/ICON0.PNG"
+background = "assets/PIC1.PNG"
+music = "assets/SND0.AT3"
 
 # Optional tool overrides:
 # go = "/path/to/go"
@@ -147,6 +150,33 @@ key only when overriding TinyGo's target:
 ```toml
 target = "/path/to/custom-psp.json"
 ```
+
+### PSP menu assets
+
+Optional menu assets are packaged directly into `EBOOT.PBP`. Relative paths
+are resolved from the directory containing `pspgo.toml`.
+
+| Setting      | PBP entry   | Format and purpose                         |
+| ------------ | ----------- | ------------------------------------------ |
+| `icon`       | `ICON0.PNG` | PNG, 144×82 game-list icon                 |
+| `animation`  | `ICON1.PMF` | PMF animated icon                          |
+| `preview`    | `PIC0.PNG`  | PNG, 480×272 information/preview image     |
+| `background` | `PIC1.PNG`  | PNG, 480×272 menu background               |
+| `music`      | `SND0.AT3`  | ATRAC3 audio played while the game is selected |
+
+Example with every supported asset:
+
+```toml
+icon = "assets/ICON0.PNG"
+animation = "assets/ICON1.PMF"
+preview = "assets/PIC0.PNG"
+background = "assets/PIC1.PNG"
+music = "assets/SND0.AT3"
+```
+
+Configured files must exist when the build starts. `pspgo` passes them to
+PSPSDK's `create_pbp_file`, which packages them without converting their
+formats.
 
 ## How it works
 
