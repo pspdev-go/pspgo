@@ -122,11 +122,6 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 			if !containsAdjacentArgs(spec.Args, "-target", "psp") {
 				t.Errorf("TinyGo command does not use its built-in PSP target: %v", spec.Args)
 			}
-			for _, arg := range spec.Args {
-				if strings.HasPrefix(arg, "-scheduler=") {
-					t.Errorf("TinyGo scheduler must come from the target, got %q", arg)
-				}
-			}
 		}
 	}
 }

@@ -66,10 +66,7 @@ func (b Builder) Build(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("compile stage: configure Go environment: %w", err)
 	}
 	env = append(env, "GOMIPS=softfloat")
-	// Scheduler selection belongs to the TinyGo target. The built-in PSP
-	// target currently selects "tasks", while custom targets remain free to
-	// choose "none" or another supported scheduler.
-	tinyArgs := []string{"build", "-no-debug", "-gc=psp", "-target", cfg.Target, "-o", object, cfg.Package}
+	tinyArgs := []string{"build", "-no-debug", "-scheduler=none", "-gc=psp", "-target", cfg.Target, "-o", object, cfg.Package}
 	if err := b.Runner.Run(ctx, command.Spec{Path: cfg.TinyGo, Args: tinyArgs, Dir: cfg.Root, Env: env}); err != nil {
 		return "", fmt.Errorf("compile stage: %w", err)
 	}
