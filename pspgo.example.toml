@@ -1,0 +1,13 @@
+# Copy to pspgo.toml in an application project when auto-detection is not enough.
+title = "PSP Go Application"
+output = "app"
+build_dir = "build/pspgo"
+sdk_root = "../pspsdk-go"
+kernel_mode = false
+
+# Every executable can also be overridden with PSPGO_* environment variables.
+# target = "/absolute/path/to/custom-psp.json"
+# tinygo = "/absolute/path/to/tinygo"
+# psp_cmake = "/absolute/path/to/psp-cmake"
+# psp_nm = "/absolute/path/to/psp-nm"
+# ppsspp = "/Applications/PPSSPP.app/Contents/MacOS/PPSSPP"
