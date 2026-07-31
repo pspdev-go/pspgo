@@ -5,6 +5,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/pspdev-go/pspgo.svg)](https://pkg.go.dev/github.com/pspdev-go/pspgo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/pspdev-go/pspgo)](https://goreportcard.com/report/github.com/pspdev-go/pspgo)
 [![CI](https://github.com/pspdev-go/pspgo/actions/workflows/ci.yaml/badge.svg)](https://github.com/pspdev-go/pspgo/actions/workflows/ci.yaml)
+[![codecov](https://codecov.io/gh/pspdev-go/pspgo/graph/badge.svg?token=O62UTU7SHA)](https://codecov.io/gh/pspdev-go/pspgo)
 
 `pspgo` is a build tool for PSP applications written with
 [`pspsdk-go`](https://github.com/pspdev-go/pspsdk-go). It compiles Go code with
