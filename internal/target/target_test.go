@@ -1,25 +1,18 @@
 package target
 
-import (
-	"os"
-	"path/filepath"
-	"testing"
-)
+import "testing"
 
-func TestMaterialize(t *testing.T) {
-	buildDir := t.TempDir()
-	path, err := Materialize(buildDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if path != filepath.Join(buildDir, "target", "psp.json") {
-		t.Fatalf("path = %q", path)
-	}
-	data, err := os.ReadFile(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(data) == 0 {
-		t.Fatal("embedded target is empty")
+func TestResolve(t *testing.T) {
+	for _, test := range []struct {
+		name, override, want string
+	}{
+		{name: "TinyGo default", want: "psp"},
+		{name: "custom target", override: "/tmp/custom.json", want: "/tmp/custom.json"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := Resolve(test.override); got != test.want {
+				t.Fatalf("Resolve(%q) = %q, want %q", test.override, got, test.want)
+			}
+		})
 	}
 }

@@ -143,9 +143,9 @@ kernel_mode = false
 # ppsspp = "/path/to/PPSSPPSDL"
 ```
 
-The PSP TinyGo target is embedded in `pspgo` and is materialized inside the
-build directory. A project does not need its own `psp.json`. Set the optional
-`target` key only when overriding the embedded target:
+The PSP target is provided by TinyGo and selected by its built-in name,
+`psp`. A project does not need its own `psp.json`. Set the optional `target`
+key only when overriding TinyGo's target:
 
 ```toml
 target = "/path/to/custom-psp.json"
@@ -156,7 +156,7 @@ target = "/path/to/custom-psp.json"
 `pspgo` owns the build orchestration:
 
 1. It selects the Go toolchain required by the project.
-2. TinyGo compiles the selected package with the embedded PSP target.
+2. TinyGo compiles the selected package with its built-in `psp` target.
 3. `psp-nm` discovers undefined PSP symbols in the generated object.
 4. `pspgo` selects the required `pspsdk-go` bridge sources and PSPSDK
    libraries.
@@ -167,8 +167,9 @@ Make, Ninja, or another available build backend depending on its configured
 generator.
 
 `pspsdk-go` remains the source of truth for PSP API packages, startup code,
-library requirement markers, and ABI adapters. `pspgo` supplies the compiler
-target and turns those components into a reproducible build pipeline.
+library requirement markers, and ABI adapters. TinyGo supplies the compiler
+target, while `pspgo` turns those components into a reproducible build
+pipeline.
 
 ## Current limitations
 

@@ -60,7 +60,7 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	for name, body := range map[string]string{"go.mod": "module github.com/pspdev-go/pspsdk-go\ngo 1.25.9\n", "psp.json": "{}"} {
+	for name, body := range map[string]string{"go.mod": "module github.com/pspdev-go/pspsdk-go\ngo 1.25.9\n"} {
 		if err := os.WriteFile(filepath.Join(sdk, name), []byte(body), 0o644); err != nil {
 			t.Fatal(err)
 		}
@@ -91,18 +91,35 @@ func TestBuildPipelineCommandsAndBridgeSelection(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := string(cmake)
-	for _, want := range []string{"gum_abi.c", "pspgum", "create_pbp_file"} {
+	for _, want := range []string{
+		"gum_abi.c", "pspgum", "create_pbp_file",
+		"_globals_start=_fdata", "_globals_end=_end", "_stack_top=0x0A000000",
+	} {
 		if !strings.Contains(text, want) {
 			t.Errorf("generated CMake missing %q:\n%s", want, text)
 		}
 	}
 	for _, spec := range fake.specs {
-		if spec.Path == "tinygo" && spec.Args[0] == "build" && !containsArg(spec.Args, "-no-debug") {
-			t.Error("TinyGo command does not suppress host debug paths")
+		if spec.Path == "tinygo" && spec.Args[0] == "build" {
+			if !containsArg(spec.Args, "-no-debug") {
+				t.Error("TinyGo command does not suppress host debug paths")
+			}
+			if !containsAdjacentArgs(spec.Args, "-target", "psp") {
+				t.Errorf("TinyGo command does not use its built-in PSP target: %v", spec.Args)
+			}
 		}
 	}
 }
 
 func containsArg(args []string, wanted string) bool {
 	return slices.Contains(args, wanted)
+}
+
+func containsAdjacentArgs(args []string, first, second string) bool {
+	for i := 0; i+1 < len(args); i++ {
+		if args[i] == first && args[i+1] == second {
+			return true
+		}
+	}
+	return false
 }

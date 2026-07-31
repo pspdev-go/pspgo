@@ -3,7 +3,7 @@
 The verified legacy flow in `pspsdk-go/build-sample.sh` was:
 
 1. force `GOTOOLCHAIN=local`, compile `example` with `GOMIPS=softfloat`,
-   `-scheduler=none`, `-gc=psp`, and `psp.json`;
+   `-scheduler=none`, `-gc=psp`, and TinyGo's built-in `psp` target;
 2. inspect surviving undefined symbols after TinyGo dead-code elimination;
 3. scan every archive under `$PSPDEV/psp/sdk/lib`, select defining members,
    and recursively include their dependencies;

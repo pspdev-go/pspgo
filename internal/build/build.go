@@ -40,6 +40,7 @@ func (b Builder) Build(ctx context.Context) (string, error) {
 	if cfg.OutputName == "" {
 		cfg.OutputName = "app"
 	}
+	cfg.Target = target.Resolve(cfg.Target)
 	if cfg.Package == "" {
 		cfg.Package = "."
 	}
@@ -55,14 +56,7 @@ func (b Builder) Build(ctx context.Context) (string, error) {
 	if err := os.MkdirAll(cmakeDir, 0o755); err != nil {
 		return "", err
 	}
-	if cfg.Target == "" {
-		var err error
-		cfg.Target, err = target.Materialize(cfg.BuildDir)
-		if err != nil {
-			return "", fmt.Errorf("compile stage: prepare embedded target: %w", err)
-		}
-		b.Config = cfg
-	}
+	b.Config = cfg
 	object := filepath.Join(objectDir, "go.o")
 	env, err := toolchain.GoEnvironment(ctx, b.Runner, cfg)
 	if err != nil {
@@ -128,6 +122,11 @@ add_executable(%s
 )
 set_source_files_properties(%s PROPERTIES EXTERNAL_OBJECT TRUE GENERATED TRUE)
 target_include_directories(%s PRIVATE %s)
+target_link_options(%s PRIVATE
+  "LINKER:--defsym,_globals_start=_fdata"
+  "LINKER:--defsym,_globals_end=_end"
+  "LINKER:--defsym,_stack_top=0x0A000000"
+)
 if(PSP_KERNEL_MODE)
   target_compile_definitions(%s PRIVATE PSPSDK_GO_KERNEL_MODE=1)
 endif()
@@ -139,7 +138,7 @@ target_link_libraries(%s
 )
 create_pbp_file(TARGET %s TITLE %s)
 `, cfg.OutputName, sourceLines.String(), cmakeQuote(object), cmakeQuote(object),
-		cfg.OutputName, cmakeQuote(cfg.SDKRoot), cfg.OutputName, cfg.OutputName,
+		cfg.OutputName, cmakeQuote(cfg.SDKRoot), cfg.OutputName, cfg.OutputName, cfg.OutputName,
 		libraryLines.String(), cfg.OutputName, cmakeQuote(cfg.Title)), nil
 }
 

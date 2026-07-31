@@ -1,26 +1,13 @@
+// Package target resolves the TinyGo target used for PSP builds.
 package target
 
-import (
-	"bytes"
-	_ "embed"
-	"os"
-	"path/filepath"
-)
+const Default = "psp"
 
-//go:embed psp.json
-var pspJSON []byte
-
-// Materialize writes the embedded TinyGo target into the build directory.
-func Materialize(buildDir string) (string, error) {
-	path := filepath.Join(buildDir, "target", "psp.json")
-	if current, err := os.ReadFile(path); err == nil && bytes.Equal(current, pspJSON) {
-		return path, nil
+// Resolve returns an explicitly configured target or TinyGo's built-in PSP
+// target name when no override is configured.
+func Resolve(override string) string {
+	if override != "" {
+		return override
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(path, pspJSON, 0o644); err != nil {
-		return "", err
-	}
-	return path, nil
+	return Default
 }

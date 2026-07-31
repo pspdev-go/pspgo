@@ -12,6 +12,7 @@ import (
 	"github.com/pspdev-go/pspgo/internal/build"
 	"github.com/pspdev-go/pspgo/internal/command"
 	"github.com/pspdev-go/pspgo/internal/config"
+	psptarget "github.com/pspdev-go/pspgo/internal/target"
 	"github.com/pspdev-go/pspgo/internal/toolchain"
 )
 
@@ -84,7 +85,7 @@ func packageArg(args []string, fallback string) string {
 func printReport(w io.Writer, cfg config.Config, report toolchain.Report) {
 	target := cfg.Target
 	if target == "" {
-		target = "embedded"
+		target = psptarget.Default + " (TinyGo built-in)"
 	}
 	fmt.Fprintf(w, "root: %s\nSDK root: %s\ntarget: %s\nbuild dir: %s\nPSPDEV: %s\n", cfg.Root, cfg.SDKRoot, target, cfg.BuildDir, report.PSPDEV)
 	for _, item := range report.Items {
